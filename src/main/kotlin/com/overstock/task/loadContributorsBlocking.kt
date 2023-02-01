@@ -8,7 +8,6 @@ import com.overstock.logProduct
 import com.overstock.logSearchItem
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.combinedResults.Meta
-import retrofit2.Response
 
 fun loadContributorsBlocking(service: ProductService, req: String) : CombinedResult {
     val searchProduct = service

@@ -1,5 +1,8 @@
 package com.overstock
 
+import com.overstock.model.combineProductList
+import com.overstock.model.combinedResults.CombinedResult
+import com.overstock.model.combinedResults.Meta
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
 import io.ktor.server.application.*
@@ -9,9 +12,8 @@ import io.ktor.server.netty.*
 import com.overstock.task.loadCombinedResultBackground
 import com.overstock.task.loadContributorsBlocking
 import com.overstock.task.loadCombinedProductSuspend
+import com.overstock.task.loadContributorsConcurrent
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.launch
@@ -31,14 +33,15 @@ import kotlinx.coroutines.runBlocking
 data class Customer(val id: Int, val firstName: String, val lastName: String)
 
 fun main(args: Array<String>) {
-    embeddedServer(
-        Netty,
-        watchPaths = listOf("com.overstock"),
-        port = 8080,
-        host = "0.0.0.0",
-        module = Application::module
-    )
-        .start(wait = true)
+    runBlocking {
+        embeddedServer(
+            Netty,
+            watchPaths = listOf("com.overstock"),
+            port = 8080,
+            host = "0.0.0.0",
+            module = Application::module
+        ).start(wait = true)
+    }
 }
 
 fun Application.module() {
@@ -120,6 +123,19 @@ fun Application.module() {
             }
 
         }
+
+        get("/combinedApi/concurrent/{searchTerm}") {
+            val searchTerm =
+                call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+            val service = createProductServiceSuspend(searchTerm)
+
+            val products = loadContributorsConcurrent(service, searchTerm)
+            println("Received products from suspend: $products")
+            val combinedResult = combineProductList(products, searchTerm);
+            call.respondText(combinedResult.toString(), ContentType.Application.Json)
+
+        }
+
 
     }
 
