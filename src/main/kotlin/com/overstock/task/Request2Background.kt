@@ -5,8 +5,8 @@ import com.overstock.model.combinedResults.CombinedResult
 import kotlin.concurrent.thread
 
 
-fun loadCombinedResultBackground(service: ProductService, req: String, updateResults: (List<CombinedResult>) -> Unit) {
+fun loadCombinedResultBackground(service: ProductService, req: String, updateResult: (CombinedResult) -> Unit) {
     thread {
-        loadContributorsBlocking(service, req)
+        updateResult(loadContributorsBlocking(service, req))
     }
 }

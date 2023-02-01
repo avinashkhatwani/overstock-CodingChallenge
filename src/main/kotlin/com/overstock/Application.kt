@@ -6,29 +6,16 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
-import com.overstock.plugins.*
 import com.overstock.task.loadCombinedResultBackground
 import com.overstock.task.loadContributorsBlocking
+import com.overstock.task.loadCombinedProductSuspend
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-
-
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.logging.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.date.*
-import kotlinx.coroutines.*
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import javax.print.attribute.standard.Compression
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 //fun main() {
 //    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -44,23 +31,25 @@ import javax.print.attribute.standard.Compression
 data class Customer(val id: Int, val firstName: String, val lastName: String)
 
 fun main(args: Array<String>) {
-    embeddedServer(Netty,
+    embeddedServer(
+        Netty,
         watchPaths = listOf("com.overstock"),
         port = 8080,
         host = "0.0.0.0",
-        module = Application::module)
+        module = Application::module
+    )
         .start(wait = true)
 }
 
 fun Application.module() {
 //    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 
-
     routing {
 
         route(SearchItem.path) {
             get("{searchTerm}") {
-                val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+                val searchTerm =
+                    call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
                 val jsonString = this.javaClass.classLoader.getResource("searchProducts-$searchTerm.json")?.readText()
                 if (jsonString != null) {
                     call.respondText(jsonString, ContentType.Application.Json)
@@ -100,29 +89,39 @@ fun Application.module() {
 //            }
 //        }
 
-        get("/combinedApi/{searchTerm}") {
+        get("/combinedApi/blocking/{searchTerm}") {
             val service = createProductService("Modern")
-            val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+            val searchTerm =
+                call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
             val products = loadContributorsBlocking(service, searchTerm)
             call.respondText(products.toString(), ContentType.Application.Json)
         }
 
-
         get("/combinedApi/backgroundThread/{searchTerm}") {
             val service = createProductService("Modern")
-            val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
-//            val products = loadCombinedResultBackground(service, searchTerm)
-//            call.respondText(products.toString(), ContentType.Application.Json)
+            val searchTerm =
+                call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+            loadCombinedResultBackground(service, searchTerm) { products ->
+                println("Received combined product from backend: $products")
+            }
+            call.respondText("Contents have been loaded", ContentType.Application.Json)
+
+        }
+
+        get("/combinedApi/suspend/{searchTerm}") {
+            val searchTerm =
+                call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+            val service = createProductServiceSuspend(searchTerm)
+
+            launch {
+                val products = loadCombinedProductSuspend(service, searchTerm)
+                println("Received combined product from suspend: $products")
+                call.respondText(products.toString(), ContentType.Application.Json)
+            }
+
         }
 
     }
 
-    fun oadContributors() {
-        val req = "modern";
-//        val service = createProductService()
-    }
 
-    install(ContentNegotiation) {
-        gson()
-    }
 }

@@ -1,12 +1,27 @@
 package com.overstock
 
 import com.overstock.model.combinedResults.CombinedResult
+import com.overstock.task.loadCombinedResultBackground
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-interface LoadProduct: CoroutineScope {
+enum class Variant {
+    BLOCKING,         // Request1Blocking
+    BACKGROUND,       // Request2Background
+    CALLBACKS,        // Request3Callbacks
+    SUSPEND,          // Request4Coroutine
+    CONCURRENT,       // Request5Concurrent
+    NOT_CANCELLABLE,  // Request6NotCancellable
+    PROGRESS,         // Request6Progress
+    CHANNELS          // Request7Channels
+}
+
+
+
+
+interface LoadProduct : CoroutineScope {
     val job: Job
 
     private enum class LoadingStatus { COMPLETED, CANCELED, IN_PROGRESS }
@@ -18,7 +33,7 @@ interface LoadProduct: CoroutineScope {
         // Start a new loading on 'load' click
         addLoadListener {
 //            saveParams()
-            loadProducts()
+//            loadProducts()
             print("LOAD PRODUCTS!!")
         }
 
@@ -33,22 +48,42 @@ interface LoadProduct: CoroutineScope {
 //        loadInitialParams()
     }
 
-    private fun updateResults(
-        combinedResults: List<CombinedResult>,
+    fun loadProducts(req: String) {
+        val service = createProductService(req);
+        val startTime = System.currentTimeMillis()
+        when (getSelectedVariant()) {
+            Variant.BACKGROUND -> { // Blocking a background thread
+//                loadCombinedResultBackground(service, req) { combinedResult -> Unit{}
+//                    updateResults(combinedResult, startTime)
+//                }
+            }
+
+//            CALLBACKS -> { // Using callbacks
+//                loadContributorsCallbacks(service, req) { users ->
+//                    SwingUtilities.invokeLater {
+//                        updateResults(users, startTime)
+//                    }
+//                }
+//            }
+
+            else -> {
+                print("No method!")
+            }
+        }
+    }
+
+    fun getSelectedVariant(): Variant
+    fun updateResults(
+        combinedResult: CombinedResult,
         startTime: Long,
         completed: Boolean = true
     ) {
-//        updateCombinedResult(combinedResults)
+        print("Updating results now!");
+        updateCombinedResult(combinedResult)
         updateLoadingStatus(if (completed) LoadingStatus.COMPLETED else LoadingStatus.IN_PROGRESS, startTime)
         if (completed) {
             setActionsStatus(newLoadingEnabled = true)
         }
-    }
-
-    fun loadProducts() {
-        val req = "Modern"
-        val service = createProductService(req);
-
     }
 
     private fun updateLoadingStatus(
@@ -71,7 +106,7 @@ interface LoadProduct: CoroutineScope {
 
     fun setLoadingStatus(text: String, iconRunning: Boolean)
 
-    fun updateCombinedResult(combinedResults: List<CombinedResult>)
+    fun updateCombinedResult(combinedResult: CombinedResult)
 
     fun setActionsStatus(newLoadingEnabled: Boolean, cancellationEnabled: Boolean = false)
     fun addLoadListener(listener: () -> Unit)
