@@ -1,0 +1,16 @@
+{
+  "id": 222,
+  "name": "Modern Table",
+  "options": [
+    {
+      "id": 6,
+      "name": "Wood",
+      "price": 1223.0
+    },
+    {
+      "id": 7,
+      "name": "Metal",
+      "price": 2154.0
+    }
+  ]
+}

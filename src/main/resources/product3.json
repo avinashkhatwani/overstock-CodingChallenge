@@ -1,0 +1,16 @@
+{
+  "id": 333,
+  "name": "Modern Couch",
+  "options": [
+    {
+      "id": 8,
+      "name": "Fuzzy",
+      "price": 892.0
+    },
+    {
+      "id": 9,
+      "name": "Leather",
+      "price": 1054.0
+    }
+  ]
+}
