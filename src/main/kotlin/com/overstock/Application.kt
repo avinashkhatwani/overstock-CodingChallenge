@@ -7,6 +7,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
 import com.overstock.plugins.*
+import com.overstock.task.loadCombinedResultBackground
 import com.overstock.task.loadContributorsBlocking
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
@@ -58,9 +59,6 @@ fun Application.module() {
     routing {
 
         route(SearchItem.path) {
-//            get {
-//                call.respond(shoppingList)
-//            }
             get("{searchTerm}") {
                 val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
                 val jsonString = this.javaClass.classLoader.getResource("searchProducts-$searchTerm.json")?.readText()
@@ -82,36 +80,39 @@ fun Application.module() {
 
         }
 
-        get("/"){
-            call.respond(Customer(1, "A","B"))
-        }
+//        get("/"){
+//            call.respond(Customer(1, "A","B"))
+//        }
 
-        get("/{id}") {
-            val id = call.parameters["id"] ?: throw IllegalArgumentException("ID parameter is missing")
-            val jsonString = this.javaClass.classLoader.getResource("product$id.json")?.readText()
-            if (jsonString != null) {
-                call.respondText(jsonString, ContentType.Application.Json)
-            }
-        }
-
-        get("/searchapi/{searchTerm}") {
-            val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
-            val jsonString = this.javaClass.classLoader.getResource("searchProducts-$searchTerm.json")?.readText()
-            if (jsonString != null) {
-                call.respondText(jsonString, ContentType.Application.Json)
-            }
-        }
+//        get("/{id}") {
+//            val id = call.parameters["id"] ?: throw IllegalArgumentException("ID parameter is missing")
+//            val jsonString = this.javaClass.classLoader.getResource("product$id.json")?.readText()
+//            if (jsonString != null) {
+//                call.respondText(jsonString, ContentType.Application.Json)
+//            }
+//        }
+//
+//        get("/searchapi/{searchTerm}") {
+//            val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+//            val jsonString = this.javaClass.classLoader.getResource("searchProducts-$searchTerm.json")?.readText()
+//            if (jsonString != null) {
+//                call.respondText(jsonString, ContentType.Application.Json)
+//            }
+//        }
 
         get("/combinedApi/{searchTerm}") {
-
-//            val retrofit = Retrofit.Builder()
-//                .baseUrl("http://localhost:8080")
-//                .addConverterFactory(MoshiConverterFactory.create())
-//                .build()
             val service = createProductService("Modern")
             val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
             val products = loadContributorsBlocking(service, searchTerm)
             call.respondText(products.toString(), ContentType.Application.Json)
+        }
+
+
+        get("/combinedApi/backgroundThread/{searchTerm}") {
+            val service = createProductService("Modern")
+            val searchTerm = call.parameters["searchTerm"] ?: throw IllegalArgumentException("SearchTerm parameter is missing")
+//            val products = loadCombinedResultBackground(service, searchTerm)
+//            call.respondText(products.toString(), ContentType.Application.Json)
         }
 
     }

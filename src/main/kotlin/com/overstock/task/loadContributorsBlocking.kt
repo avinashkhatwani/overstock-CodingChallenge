@@ -4,6 +4,8 @@ package com.overstock.task
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
 import com.overstock.ProductService
+import com.overstock.logProduct
+import com.overstock.logSearchItem
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.combinedResults.Meta
 import retrofit2.Response
@@ -12,7 +14,7 @@ fun loadContributorsBlocking(service: ProductService, req: String) : CombinedRes
     val searchProduct = service
         .getSearchItemCall(req)
         .execute() // Executes request and blocks the current thread
-//        .also { logRepos(req, it) }
+        .also { logSearchItem(req, it) }
         .body() ?: SearchItem("", emptyList())
     val productIds = searchProduct.itemIds
 
@@ -26,6 +28,7 @@ fun loadContributorsBlocking(service: ProductService, req: String) : CombinedRes
 
     var products: List<Product> = searchProduct.itemIds.mapNotNull { id ->
         val response = service.getProductCall(id).execute()
+            .also { logProduct(req, it) }
         if (response.isSuccessful && response.body() != null) {
             response.body()
         } else {
