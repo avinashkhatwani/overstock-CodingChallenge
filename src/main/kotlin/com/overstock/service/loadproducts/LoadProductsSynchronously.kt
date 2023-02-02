@@ -1,20 +1,19 @@
-package com.overstock.task
+package com.overstock.service.loadproducts
 
 
 import com.overstock.model.product.Product
-import com.overstock.model.searchitem.SearchItem
 import com.overstock.service.ProductService
 import com.overstock.logProduct
 import com.overstock.logSearchItem
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.combinedResults.Meta
 
-fun loadProductsBlocking(service: ProductService, req: String) : List<Product> {
+fun loadProductsSynchronously(service: ProductService, req: String): CombinedResult {
     val searchProduct = service
         .getSearchItemCall(req)
         .execute() // Executes request and blocks the current thread
         .also { logSearchItem(req, it) }
-        .body() ?: SearchItem("", emptyList())
+        .body() ?: return CombinedResult(Meta(req, 0), emptyList())
 
     val products: List<Product> = searchProduct.itemIds.mapNotNull { id ->
         val response = service.getProductCall(id).execute()
@@ -24,15 +23,12 @@ fun loadProductsBlocking(service: ProductService, req: String) : List<Product> {
         } else {
             null
         }
-    }.toList()
+    }
 
     val modifiedProductList = products.map { product ->
-        val productOptions = product.options
-        val priceRange = productOptions.map { it.price }.let { "${it.min()} - ${it.max()}" }
+        val priceRange = product.options.map { it.price }.let { "${it.min()} - ${it.max()}" }
         product.copy(priceRange = priceRange)
-    }.toList()
+    }
 
-    val combinedResult = CombinedResult(Meta(req, modifiedProductList.size), modifiedProductList)
-
-    return products;
+    return CombinedResult(Meta(req, modifiedProductList.size), modifiedProductList);
 }

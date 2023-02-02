@@ -1,5 +1,6 @@
 package com.overstock.model
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.combinedResults.Meta
 import com.overstock.model.product.Product
@@ -16,4 +17,9 @@ fun combineProductList(products: List<Product?>, searchTerm: String): CombinedRe
     }
 
     return CombinedResult(Meta(searchTerm, modifiedProductList.size), modifiedProductList);
+}
+
+fun toJsonString(obj: Any): String {
+    val mapper = jacksonObjectMapper()
+    return mapper.writeValueAsString(obj)
 }

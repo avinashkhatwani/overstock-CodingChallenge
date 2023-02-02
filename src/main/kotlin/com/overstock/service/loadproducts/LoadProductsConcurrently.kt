@@ -1,13 +1,13 @@
-package com.overstock.task
+package com.overstock.service.loadproducts
 
-import com.overstock.ProductServiceSuspended
+import com.overstock.service.ProductServiceSuspend
 import com.overstock.logProduct
 import com.overstock.logSearchItem
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
 import kotlinx.coroutines.*
 
-suspend fun loadProductsConcurrent(service: ProductServiceSuspended, req: String): List<Product?> = coroutineScope {
+suspend fun loadProductsConcurrently(service: ProductServiceSuspend, req: String): List<Product?> = coroutineScope {
     val searchProduct = service
         .getSearchItem(req)
         .also { logSearchItem(req, it) }

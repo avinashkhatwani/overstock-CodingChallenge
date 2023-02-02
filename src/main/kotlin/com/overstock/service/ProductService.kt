@@ -1,10 +1,7 @@
 package com.overstock.service
 
-import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
-import kotlinx.serialization.ExperimentalSerializationApi
-//import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -23,24 +20,19 @@ interface ProductService {
         @Path("searchTerm") searchTerm: String
     ): Call<SearchItem>
 
-    @GET("/combined-api/{searchTerm}")
-    fun getCombinedApiCall(): Call<CombinedResult>
 }
 
-
-@OptIn(ExperimentalSerializationApi::class)
-public fun createProductService(searchTerm: String): ProductService {
+fun createProductService(): ProductService {
     val httpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val original = chain.request()
             val builder = original.newBuilder()
-                .header("Accept", "application/vnd.github.v3+json")
+                .header("Accept", "application/json")
             val request = builder.build()
             chain.proceed(request)
         }
         .build()
 
-//    val contentType = "application/json".toMediaType()
     val retrofit = Retrofit.Builder()
         .baseUrl("http://localhost:8080")
         .client(httpClient)

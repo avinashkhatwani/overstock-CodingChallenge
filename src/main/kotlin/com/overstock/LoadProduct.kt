@@ -50,7 +50,7 @@ interface LoadProduct : CoroutineScope {
     }
 
     fun loadProducts(req: String) {
-        val service = createProductService(req);
+        val service = createProductService();
         val startTime = System.currentTimeMillis()
         when (getSelectedVariant()) {
             Variant.BACKGROUND -> { // Blocking a background thread

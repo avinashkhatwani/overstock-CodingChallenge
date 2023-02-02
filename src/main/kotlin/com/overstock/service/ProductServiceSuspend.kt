@@ -1,52 +1,44 @@
-package com.overstock
+package com.overstock.service
 
-import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
-import com.overstock.service.ProductService
-import kotlinx.serialization.ExperimentalSerializationApi
 //import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface ProductServiceWithListener {
+interface ProductServiceSuspend {
     @GET("/product/{id}")
-    fun getProductCall(
+    suspend fun getProduct(
         @Path("id") id: Int
-    ): Call<Product>
+    ): Response<Product>
 
     @GET("/searchItem/{searchTerm}")
-    fun getSearchItemCall(
+    suspend fun getSearchItem(
         @Path("searchTerm") searchTerm: String
-    ): Call<SearchItem>
+    ): Response<SearchItem>
 
-    @GET("/combined-api/{searchTerm}")
-    fun getCombinedApiCall(): Call<CombinedResult>
 }
 
-
-@OptIn(ExperimentalSerializationApi::class)
-public fun createProductServiceWithListener(searchTerm: String): ProductService {
+fun createProductServiceWithSuspend(): ProductServiceSuspend {
     val httpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val original = chain.request()
             val builder = original.newBuilder()
-                .header("Accept", "application/vnd.github.v3+json")
+                .header("Accept", "application/json")
             val request = builder.build()
             chain.proceed(request)
         }
         .build()
 
-//    val contentType = "application/json".toMediaType()
     val retrofit = Retrofit.Builder()
         .baseUrl("http://localhost:8080")
         .client(httpClient)
         .addConverterFactory(MoshiConverterFactory.create())
         .build()
-    return retrofit.create(ProductService::class.java)
+    return retrofit.create(ProductServiceSuspend::class.java)
 }
 
