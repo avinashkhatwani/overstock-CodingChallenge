@@ -40,7 +40,7 @@ fun main(args: Array<String>) {
 
                 route(Product.path) {
                     get("/{id}") {
-//                        Thread.sleep(2000)
+                        delay(1000);
                         val id = call.parameters["id"] ?: throw IllegalArgumentException("ID parameter is missing")
                         val jsonString = this.javaClass.classLoader.getResource("product$id.json")?.readText()
                         if (jsonString != null) {

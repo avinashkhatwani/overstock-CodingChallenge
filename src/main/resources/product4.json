@@ -1,0 +1,16 @@
+{
+  "id": 444,
+  "name": "Modern Bed",
+  "options": [
+    {
+      "id": 8,
+      "name": "Twin",
+      "price": 350.0
+    },
+    {
+      "id": 9,
+      "name": "Single",
+      "price": 500.0
+    }
+  ]
+}
