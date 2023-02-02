@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchItem(
     val searchTerm: String,
-    val itemIds: List<Int>){
-
+    val itemIds: List<Int>
+) {
     companion object {
         const val path = "/searchItem"
     }

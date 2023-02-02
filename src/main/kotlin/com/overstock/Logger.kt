@@ -6,28 +6,28 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import retrofit2.Response
 
-val log: Logger = LoggerFactory.getLogger("Products")
+val log: Logger = LoggerFactory.getLogger("ProductPlatform")
 
 fun log(msg: String?) {
     log.info(msg)
 }
 
-fun logProduct(req: String, response: Response<Product>) {
+fun logProduct(id: Int, response: Response<Product>) {
     val product = response.body()
     if (!response.isSuccessful || product == null) {
-        log.error("Failed loading Product for $req with response: '${response.code()}: ${response.message()}'")
+        log.error("Failed loading Product for productId:$id with response: '${response.code()}: ${response.message()}'")
     }
     else {
-        log.info("$req: loaded $product product")
+        log.info("productId:$id- loaded product with details $product ")
     }
 }
 
 fun logSearchItem(req: String, response: Response<SearchItem>) {
     val searchItem = response.body()
     if (!response.isSuccessful || searchItem == null) {
-        log.error("Failed loading searchItem for $req with response '${response.code()}: ${response.message()}'")
+        log.error("Failed loading searchItem for searchString$req with response '${response.code()}: ${response.message()}'")
     }
     else {
-        log.info("$req: loaded $searchItem searchItem deatils")
+        log.info("searchItem:$req- loaded searchItem with details $searchItem")
     }
 }

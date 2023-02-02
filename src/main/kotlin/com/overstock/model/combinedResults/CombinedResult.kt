@@ -3,15 +3,13 @@ package com.overstock.model.combinedResults
 import com.overstock.model.product.Product
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class CombinedResult(
     val meta: Meta,
     val items: List<Product?>
 ) {
-
     companion object {
-        const val path = "/combinedResult"
+        const val path = "/combinedApi"
     }
 }
 

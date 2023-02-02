@@ -3,31 +3,22 @@ package com.overstock.task
 
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
-import com.overstock.ProductService
+import com.overstock.service.ProductService
 import com.overstock.logProduct
 import com.overstock.logSearchItem
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.combinedResults.Meta
 
-fun loadContributorsBlocking(service: ProductService, req: String) : CombinedResult {
+fun loadProductsBlocking(service: ProductService, req: String) : List<Product> {
     val searchProduct = service
         .getSearchItemCall(req)
         .execute() // Executes request and blocks the current thread
         .also { logSearchItem(req, it) }
         .body() ?: SearchItem("", emptyList())
-    val productIds = searchProduct.itemIds
 
-    //WORKING!
-    var products1: List<Product>  = searchProduct.itemIds.map { id ->
-        service.getProductCall(id)
-            .execute() // Executes request and blocks the current thread
-//            .also { logUser(repo, it) }
-            .body()?: Product(0, "", "", emptyList())
-    }
-
-    var products: List<Product> = searchProduct.itemIds.mapNotNull { id ->
+    val products: List<Product> = searchProduct.itemIds.mapNotNull { id ->
         val response = service.getProductCall(id).execute()
-            .also { logProduct(req, it) }
+            .also { logProduct(id, it) }
         if (response.isSuccessful && response.body() != null) {
             response.body()
         } else {
@@ -43,5 +34,5 @@ fun loadContributorsBlocking(service: ProductService, req: String) : CombinedRes
 
     val combinedResult = CombinedResult(Meta(req, modifiedProductList.size), modifiedProductList)
 
-    return combinedResult;
+    return products;
 }

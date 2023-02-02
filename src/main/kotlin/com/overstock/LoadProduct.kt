@@ -1,7 +1,8 @@
 package com.overstock
 
 import com.overstock.model.combinedResults.CombinedResult
-import com.overstock.task.loadCombinedResultBackground
+import com.overstock.service.createProductService
+//import com.overstock.task.loadCombinedResultBackground
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

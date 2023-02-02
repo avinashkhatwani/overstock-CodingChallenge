@@ -1,13 +1,10 @@
-package com.overstock
+package com.overstock.service
 
 import com.overstock.model.combinedResults.CombinedResult
 import com.overstock.model.product.Product
 import com.overstock.model.searchitem.SearchItem
-import com.squareup.moshi.Json
 import kotlinx.serialization.ExperimentalSerializationApi
 //import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
